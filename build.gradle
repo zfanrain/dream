@@ -1,0 +1,121 @@
+apply plugin: 'eclipse'
+apply plugin: 'war'
+apply plugin: "com.dsvdsv.gradle.plugin"
+apply plugin: 'eclipse-wtp'
+
+apply plugin: 'rebel'
+
+version = 0.1
+sourceCompatibility = 1.8
+
+//修改默认目录结构防止gradle找不到源文件
+sourceSets{
+	main{
+		java{
+			srcDirs = ['src']
+		}
+	}
+	
+	test{
+		java{
+			srcDirs = ['test']
+		}
+	}
+}
+
+buildscript {
+  repositories {
+	 mavenLocal()
+     mavenCentral()
+     maven {
+	  url "https://plugins.gradle.org/m2/"
+	 }
+
+     jcenter()
+  }
+  dependencies {
+     classpath("org.zeroturnaround:gradle-jrebel-plugin:1.1.3")
+     //classpath('org.akhikhl.gretty:gretty:1.2.4')
+     classpath "gradle.plugin.com.dsvdsv.gradle.plugin:gradle-jetty-plugin:1.5.1"
+  }
+}
+
+//编译时的编码
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+   mavenCentral()
+   jcenter()
+}
+
+dependencies {
+	testCompile('junit:junit:4.+')
+    runtime('javax.servlet:jstl:1.2')
+    providedCompile('org.jboss.spec.javax.servlet:jboss-servlet-api_3.0_spec:1.0.2.Final')
+    //compile files('src/main/resources/lib/editor.jar')
+    compile fileTree('src/main/resources/lib')
+	compile(
+		'junit:junit:4.12',
+		//Spring Test
+		'org.springframework:spring-test:4.1.9.RELEASE',
+		'org.springframework:spring-webmvc:4.1.9.RELEASE',
+		//Spring jpa
+		'org.springframework.data:spring-data-jpa:1.10.2.RELEASE',
+		//Spring Shiro
+		'org.apache.shiro:shiro-spring:1.2.5',
+		//hibernate
+		'org.hibernate:hibernate-core:4.3.2.Final',
+		'org.hibernate:hibernate-entitymanager:4.3.2.Final',		
+		//Log4j
+		'log4j:log4j:1.2.17',
+		//slf4j-log4j
+		'org.slf4j:slf4j-log4j12:1.7.13',
+		//slf4j-parent
+		'org.slf4j:jcl-over-slf4j:1.7.6',
+		//mysql-connector
+		'mysql:mysql-connector-java:5.1.37',
+		//mybatis
+		'org.mybatis:mybatis:3.2.5',
+		//mybatis-spring
+		'org.mybatis:mybatis-spring:1.2.3',
+		//mybatis-pagehelper
+		'com.github.pagehelper:pagehelper:4.0.3',
+		//datasource:druid
+		'com.alibaba:druid:1.0.16',
+		//fastjson
+		'com.alibaba:fastjson:1.2.7',
+		'commons-fileupload:commons-fileupload:1.3.1',
+		'com.fasterxml.jackson.core:jackson-databind:2.6.4',
+		//jetty输出spring需要这个支持
+		'org.jboss:jboss-vfs:3.2.11.Final',
+		'dom4j:dom4j:1.6.1',
+		'com.thoughtworks.xstream:xstream:1.4.8',
+		'org.apache.httpcomponents:httpclient:4.5.1',
+		'org.apache.httpcomponents:httpmime:4.5.1'
+	)
+}
+
+jettyRun{
+	httpPort = 8088
+	webAppSourceDirectory file("$projectDir/src/main/webapp") 
+	contextPath = ''
+	//contextPath project.name 
+	scanIntervalSeconds 1  
+}
+
+rebel{
+	showGenerated = true
+	classpath{
+		omitDefaultClassesDir = true
+		omitDefaultResourcesDir = true
+		resource{
+			directory = "bin"
+		}
+	}
+}
+
+//创建资源目录的任务
+task createSrcDirs << {
+    sourceSets*.java.srcDirs*.each { it.mkdirs() }
+    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
