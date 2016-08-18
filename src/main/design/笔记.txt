@@ -1,0 +1,3 @@
+1.
+参考资料http://blog.csdn.net/copy202/article/details/9126905
+不设置metadata-complete="true"，那么jetty会检查程序中所有的annotations，程序中spring和其他的annotations不需要jetty来检查
